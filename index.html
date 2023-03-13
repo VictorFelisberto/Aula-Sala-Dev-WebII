@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora VueJS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha512-NmLkDIU1C/C88wi324HBc+S2kLhi08PN5GDeUVVVC/BVt/9Izdsc9SVeVfA1UZbY3sHUlDSyRXhCzHfr6hmPPw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="Tes.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+    <main>
+        <div id="app">
+            <h1 id="title">Calculadora VueJS</h1>
+            <h2 id="display">{{ display }}</h2>
+            <button @click="addNum(0)" id="num0">0</button>
+            <button @click="addNum(1)" id="num1">1</button>
+            <button @click="addNum(2)" id="num2">2</button>
+            <button @click="addNum(3)" id="num3">3</button>
+            <button @click="addNum(4)" id="num4">4</button>
+            <button @click="addNum(5)" id="num5">5</button>
+            <button @click="addNum(6)" id="num6">6</button>
+            <button @click="addNum(7)" id="num7">7</button>
+            <button @click="addNum(8)" id="num8">8</button>
+            <button @click="addNum(9)" id="num9">9</button>
+            <button @click="addOp('+')" id="sum">+</button>
+            <button @click="addOp('-')" id="sub">-</button>
+            <button @click="addOp('*')" id="mult">*</button>
+            <button @click="addOp('/')" id="div">/</button>
+            <button @click="addNum('.')" id="dot">.</button>
+            <button @click="equal()" id="equal">=</button>
+            <button @click="clear()" id="clear">Limpa</button>
+        </div>
+    </main>
+</body>
+<script>
+    const { createApp } = Vue;
+    createApp({
+        data() {
+            return {
+                display: 0,
+                number1: "",
+                operator: "",
+                number2: "",
+                result: "",
+                end: false
+            }
+        },
+        mounted() {
+            window.addEventListener('keydown', this.onKeyPress);
+        },
+        beforeDestroy() {
+            window.removeEventListener('keydown', this.onKeyPress);
+        },
+        methods: {
+            addNum(num) {
+                if(this.end === true) {
+                    this.clear();
+                }
+                if(this.operator === "") {
+                    if(num =="." && this.number1.includes(".")) {
+                        num = "";
+                    }
+                    this.number1 += num;
+                } else {
+                    if(num =="." && this.number2.includes(".")) {
+                        num = "";
+                    }
+                    this.number2 += num;
+                }
+                this.updateDisplay();
+            },
+            addOp(op) {
+                if(this.number1 != "" && this.end === false) {
+                    this.operator = ` ${op} `;
+                    this.updateDisplay();
+                }
+            },
+            updateDisplay() {
+                this.display = this.number1 + this.operator + this.number2;
+            },
+            clear() {
+                this.number1 = this.number2 = this.operator = "";
+                this.display = 0;
+                this.end = false;
+            },
+            convertToInt(number) {
+                return number % 1 === 0 ? parseInt(number) : number;
+            },
+            equal() {
+                if(this.number2 != "") {
+                    this.number1 = parseFloat(this.number1);
+                    this.number2 = parseFloat(this.number2);
+                    this.result = eval(this.number1 + this.operator + this.number2).toFixed(2);
+                    this.result = this.convertToInt(this.result);
+                    this.display += ` = ${this.result}`;
+                    this.end = true;
+                }
+            },
+            onKeyPress(event) {
+                let key = event.key;
+                const ops = /[+\-*/]/;
+                const del = ['Backspace', 'Delete', 'Escape'];
+                const dot = ['.', ',', ';'];
+
+                if(!isNaN(key)) {
+                    this.addNum(key);
+                } else if(dot.includes(key)) {
+                    this.addNum('.')
+                } else if(ops.test(key)) {
+                    this.addOp(key);
+                } else if(del.includes(key)) {
+                    this.clear();
+                } else if(key == 'Enter') {
+                    this.equal();
+                }
+            }
+        }
+    }).mount("#app");
+</script>
+</html>
